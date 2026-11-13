@@ -17,13 +17,28 @@ import sys
 
 
 def _get_icon_path() -> str:
-    """Return path to the bundled icon (works in PyInstaller and from source)."""
+    """Return path to the icon (works in PyInstaller, installed mode, and from source)."""
+    candidates = []
     if getattr(sys, "frozen", False):
-        base = sys._MEIPASS  # PyInstaller temp dir
+        meipass = getattr(sys, "_MEIPASS", "")
+        if meipass:
+            candidates.append(os.path.join(meipass, "assets", "ytd_icon.ico"))
+            candidates.append(os.path.join(meipass, "ytd_icon.ico"))
+        exe_dir = os.path.dirname(sys.executable)
+        candidates.append(os.path.join(exe_dir, "ytd_icon.ico"))
+        candidates.append(os.path.join(exe_dir, "assets", "ytd_icon.ico"))
     else:
-        base = os.path.join(os.path.dirname(__file__), "..", "assets")
-    ico = os.path.join(base, "ytd_icon.ico")
-    return ico if os.path.exists(ico) else ""
+        candidates.append(os.path.join(os.path.dirname(__file__), "..", "assets", "ytd_icon.ico"))
+
+    # Also check user appdata install dir
+    local_appdata = os.environ.get("LOCALAPPDATA", "")
+    if local_appdata:
+        candidates.append(os.path.join(local_appdata, "Programs", "YTD", "ytd_icon.ico"))
+
+    for c in candidates:
+        if c and os.path.exists(c):
+            return os.path.abspath(c)
+    return ""
 
 
 def main():

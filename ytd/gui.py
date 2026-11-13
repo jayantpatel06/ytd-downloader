@@ -88,6 +88,15 @@ def run_gui():
     root.geometry("480x320")
     root.resizable(False, False)
 
+    # Set window and taskbar icon
+    try:
+        from ytd.cli import _get_icon_path
+        ico = _get_icon_path()
+        if ico and os.path.exists(ico):
+            root.iconbitmap(ico)
+    except Exception:
+        pass
+
     tk.Label(root, text="YouTube Downloader", font=("Arial", 16, "bold")).pack(pady=(12, 2))
 
     tk.Label(root, text="Video / Playlist URL:").pack()

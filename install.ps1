@@ -4,6 +4,11 @@
 
 $ErrorActionPreference = "Stop"
 
+# Ensure TLS 1.2 and 1.3 are enabled (required on fresh Windows for GitHub downloads)
+try {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 -bor [Net.SecurityProtocolType]::Tls13
+} catch {}
+
 $repo = "jayantpatel06/ytd-downloader"
 $installDir = "$env:LOCALAPPDATA\Programs\YTD"
 $exePath = "$installDir\ytd.exe"
@@ -26,6 +31,7 @@ $iconUrl = "https://raw.githubusercontent.com/$repo/main/assets/ytd_icon.ico"
 
 Write-Host "⬇️  Downloading ytd.exe..." -ForegroundColor Yellow
 $wc = New-Object System.Net.WebClient
+$wc.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) ytd-installer")
 try {
     $wc.DownloadFile($downloadUrl, $exePath)
     Write-Host "✅ Downloaded ytd.exe" -ForegroundColor Green
