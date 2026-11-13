@@ -1,0 +1,140 @@
+# .github/workflows/release.yml
+#
+# Triggered when you push a git tag like  v1.0.0
+#   git tag v1.0.0 && git push origin v1.0.0
+#
+# What it does:
+#   1. Builds ytd.exe on Windows (PyInstaller) with custom icon + shortcut support
+#   2. Publishes the exe as a GitHub Release asset
+#   3. Publishes the Python package to PyPI
+
+name: Build & Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  # ───────────────────────────────────────────────
+  # 1. Build Windows exe
+  # ───────────────────────────────────────────────
+  build-exe:
+    name: Build Windows exe
+    runs-on: windows-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install yt-dlp pyinstaller pillow pywin32
+
+      - name: Convert PNG icon to ICO
+        run: |
+          python -c "
+          from PIL import Image
+          img = Image.open('assets/ytd_icon.png').convert('RGBA')
+          sizes = [(16,16),(32,32),(48,48),(64,64),(128,128),(256,256)]
+          frames = [img.resize(s, Image.LANCZOS) for s in sizes]
+          frames[0].save('assets/ytd_icon.ico', format='ICO', sizes=sizes, append_images=frames[1:])
+          print('ICO ready')
+          "
+
+      - name: Setup ffmpeg for bundling
+        run: |
+          $ffmpegCmd = Get-Command ffmpeg -ErrorAction SilentlyContinue
+          if ($ffmpegCmd) {
+            Copy-Item $ffmpegCmd.Source -Destination "assets\ffmpeg.exe"
+            Write-Host "ffmpeg found in runner and copied to assets/"
+          } else {
+            choco install ffmpeg -y
+            $newFfmpeg = Get-Command ffmpeg
+            Copy-Item $newFfmpeg.Source -Destination "assets\ffmpeg.exe"
+            Write-Host "ffmpeg installed via choco and copied to assets/"
+          }
+
+      - name: Build exe
+        run: |
+          python -m PyInstaller `
+            --onefile `
+            --noconsole `
+            --name ytd `
+            --icon assets/ytd_icon.ico `
+            "--add-data=assets;assets" `
+            "--add-binary=assets/ffmpeg.exe;." `
+            --hidden-import ytd.gui `
+            --hidden-import ytd.cli `
+            --hidden-import ytd.shortcut `
+            --hidden-import ytd.ffmpeg_utils `
+            --hidden-import win32com `
+            --hidden-import win32com.client `
+            --hidden-import win32com.shell `
+            --hidden-import pythoncom `
+            ytd/cli.py
+
+      - name: Upload exe artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ytd-exe
+          path: dist/ytd.exe
+
+  # ───────────────────────────────────────────────
+  # 2. Create GitHub Release + attach exe
+  # ───────────────────────────────────────────────
+  github-release:
+    name: Publish GitHub Release
+    needs: build-exe
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download exe artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: ytd-exe
+          path: dist/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/ytd.exe
+          generate_release_notes: true
+
+  # ───────────────────────────────────────────────
+  # 3. Publish to PyPI
+  # ───────────────────────────────────────────────
+  pypi-publish:
+    name: Publish to PyPI
+    needs: build-exe
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install build tools
+        run: pip install build twine
+
+      - name: Build sdist + wheel
+        run: python -m build
+
+      - name: Publish to PyPI
+        env:
+          TWINE_USERNAME: __token__
+          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
+        run: twine upload dist/*
+
