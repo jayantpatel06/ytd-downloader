@@ -75,17 +75,21 @@ def _create_shortcut_powershell(icon_path: str = "") -> bool:
     desktop = get_desktop_path()
     lnk_path = os.path.join(desktop, "YouTube Downloader.lnk")
     work_dir = os.path.dirname(exe_path)
-    icon_arg = f"$s.IconLocation = '{exe_path},0'"
+
+    lnk_esc = lnk_path.replace("'", "''")
+    exe_esc = exe_path.replace("'", "''")
+    work_esc = work_dir.replace("'", "''")
+    icon_arg = f"$s.IconLocation = '{exe_esc},0'"
     if icon_path and os.path.exists(icon_path):
-        abs_icon = os.path.abspath(icon_path).replace("'", "''")
-        icon_arg = f"$s.IconLocation = '{abs_icon},0'"
+        icon_esc = os.path.abspath(icon_path).replace("'", "''")
+        icon_arg = f"$s.IconLocation = '{icon_esc},0'"
 
     ps_script = (
         f"$ws = New-Object -ComObject WScript.Shell; "
-        f"$s = $ws.CreateShortcut('{lnk_path}'); "
-        f"$s.TargetPath = '{exe_path}'; "
-        f"$s.WorkingDirectory = '{work_dir}'; "
-        f"$s.Description = 'YouTube Downloader — powered by yt-dlp'; "
+        f"$s = $ws.CreateShortcut('{lnk_esc}'); "
+        f"$s.TargetPath = '{exe_esc}'; "
+        f"$s.WorkingDirectory = '{work_esc}'; "
+        f"$s.Description = 'YouTube Downloader'; "
         f"{icon_arg}; "
         f"$s.Save()"
     )

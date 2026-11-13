@@ -1,4 +1,4 @@
-# install.ps1 — Web installer for YouTube Downloader
+﻿# install.ps1 — Web installer for YouTube Downloader
 # Usage:
 #   irm https://raw.githubusercontent.com/jayantpatel06/ytd-downloader/main/install.ps1 | iex
 
@@ -17,7 +17,9 @@ $startMenu = "$env:APPDATA\Microsoft\Windows\Start Menu\Programs"
 
 Write-Host "Installing YouTube Downloader..."
 
-# 1. Ensure install folder exists
+# 1. Ensure install folder exists and running process is stopped
+Get-Process ytd -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+
 if (-not (Test-Path $installDir)) {
     New-Item -ItemType Directory -Path $installDir -Force | Out-Null
 }

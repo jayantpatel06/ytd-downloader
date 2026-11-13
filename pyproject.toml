@@ -28,9 +28,9 @@ windows = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/YOUR_USERNAME/ytd-downloader"
-"Bug Reports" = "https://github.com/YOUR_USERNAME/ytd-downloader/issues"
-Source = "https://github.com/YOUR_USERNAME/ytd-downloader"
+Homepage = "https://github.com/jayantpatel06/ytd-downloader"
+"Bug Reports" = "https://github.com/jayantpatel06/ytd-downloader/issues"
+Source = "https://github.com/jayantpatel06/ytd-downloader"
 
 [project.scripts]
 ytd = "ytd.cli:main"

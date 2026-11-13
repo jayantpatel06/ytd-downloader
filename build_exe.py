@@ -28,14 +28,14 @@ def convert_png_to_ico():
         resized = [img.resize(s, Image.LANCZOS) for s in sizes]
         resized[0].save(ICON_ICO, format="ICO", sizes=sizes,
                         append_images=resized[1:])
-        print(f"✅ Icon converted: {ICON_ICO}")
+        print(f"Icon converted: {ICON_ICO}")
         return True
     except ImportError:
-        print("⚠️  Pillow not installed — skipping PNG→ICO conversion.")
-        print("   Run: pip install pillow")
+        print("Pillow not installed; skipping PNG->ICO conversion.")
+        print("Run: pip install pillow")
         return False
     except FileNotFoundError:
-        print(f"⚠️  Icon PNG not found at {ICON_PNG} — building without custom icon.")
+        print(f"Icon PNG not found at {ICON_PNG}; building without custom icon.")
         return False
 
 

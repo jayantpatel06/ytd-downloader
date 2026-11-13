@@ -81,7 +81,17 @@ jobs:
 
       - name: Build Windows Setup Wizard (ytd-setup.exe)
         run: |
-          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+          $iscc = Get-Command iscc -ErrorAction SilentlyContinue
+          if ($iscc) {
+            & $iscc.Source installer.iss
+          } elseif (Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe") {
+            & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
+          } elseif (Test-Path "C:\Program Files\Inno Setup 6\ISCC.exe") {
+            & "C:\Program Files\Inno Setup 6\ISCC.exe" installer.iss
+          } else {
+            Write-Error "Inno Setup compiler (ISCC.exe) not found!"
+            exit 1
+          }
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
