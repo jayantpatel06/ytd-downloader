@@ -71,26 +71,26 @@ def build():
     ffmpeg_local = os.path.join("assets", "ffmpeg.exe")
     if os.path.exists(ffmpeg_local):
         cmd.append(f"--add-binary={ffmpeg_local}{os.pathsep}.")
-        print("📦 Bundling ffmpeg.exe directly into ytd.exe (100% standalone)")
+        print("Bundling local ffmpeg.exe into ytd.exe")
     elif shutil.which("ffmpeg"):
         ffmpeg_bin = shutil.which("ffmpeg")
         cmd.append(f"--add-binary={ffmpeg_bin}{os.pathsep}.")
-        print(f"📦 Bundling system ffmpeg ({ffmpeg_bin}) into ytd.exe")
+        print(f"Bundling system ffmpeg ({ffmpeg_bin}) into ytd.exe")
 
     if has_icon:
         cmd += ["--icon", ICON_ICO]
 
     cmd.append("ytd/cli.py")
 
-    print("Building ytd.exe …")
+    print("Building ytd.exe...")
     print("Command:", " ".join(cmd))
     result = subprocess.run(cmd, check=False)
 
     if result.returncode == 0:
-        print("\n✅ Done!  Your executable is at:  dist/ytd.exe")
-        print("   First launch will create a Desktop shortcut automatically.")
+        print("\nBuild complete. Executable created at: dist/ytd.exe")
+        print("First launch creates a Desktop shortcut automatically.")
     else:
-        print("\n❌ Build failed. See output above.")
+        print("\nBuild failed. See output above.")
         sys.exit(result.returncode)
 
 

@@ -107,9 +107,9 @@ def main():
     try:
         with YoutubeDL(ydl_opts) as ydl:
             ydl.download([args.url])
-        print("[ytd] ✅ Done!")
+        print("[ytd] Done.")
     except Exception as exc:
-        print(f"[ytd] ❌ Failed: {exc}", file=sys.stderr)
+        print(f"[ytd] Error: {exc}", file=sys.stderr)
         sys.exit(1)
 
 

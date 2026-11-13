@@ -70,10 +70,10 @@ def run_gui():
             with YoutubeDL(ydl_opts) as ydl:
                 ydl.download([url])
             progress_bar["value"] = 100
-            status_label.config(text="✅ Download completed!")
+            status_label.config(text="Download completed.")
         except Exception as exc:
             messagebox.showerror("Download failed", str(exc))
-            status_label.config(text="❌ Error occurred.")
+            status_label.config(text="Error occurred.")
         finally:
             download_btn.config(state="normal")
 
@@ -81,7 +81,7 @@ def run_gui():
         path = filedialog.askdirectory(title="Choose download folder")
         if path:
             download_dir["path"] = path
-            dir_label.config(text=f"📁 {path}")
+            dir_label.config(text=path)
 
     root = tk.Tk()
     root.title("YouTube Downloader  v1.0")
@@ -119,17 +119,17 @@ def run_gui():
 
     row_dir = tk.Frame(root)
     row_dir.pack(pady=2)
-    tk.Button(row_dir, text="📁 Choose folder", command=choose_directory).pack(side="left")
-    dir_label = tk.Label(row_dir, text="(saves next to exe by default)", fg="grey")
+    tk.Button(row_dir, text="Browse...", command=choose_directory).pack(side="left")
+    dir_label = tk.Label(row_dir, text="(current folder by default)", fg="grey")
     dir_label.pack(side="left", padx=8)
 
-    download_btn = tk.Button(root, text="⬇  Download", command=start_download_thread,
+    download_btn = tk.Button(root, text="Download", command=start_download_thread,
                              width=22, font=("Arial", 11, "bold"))
     download_btn.pack(pady=10)
 
     progress_bar = ttk.Progressbar(root, length=400, maximum=100)
     progress_bar.pack(pady=4)
-    status_label = tk.Label(root, text="Waiting…", font=("Arial", 10))
+    status_label = tk.Label(root, text="Ready", font=("Arial", 10))
     status_label.pack()
 
     root.mainloop()

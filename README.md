@@ -1,153 +1,144 @@
 # YouTube Downloader (ytd)
 
-> A simple, cross-platform YouTube / multi-site video downloader powered by **yt-dlp**.
-> Ships with a **GUI** (tkinter) and a full **CLI** — zero configuration needed.
+<p align="center">
+  <img src="assets/ytd_icon.png" width="96" height="96" alt="YouTube Downloader Logo">
+  <br>
+  <b>A fast, minimal video and audio downloader powered by yt-dlp.</b>
+  <br>
+  <span>Includes both a desktop GUI and a command-line interface. No Python or FFmpeg setup required for Windows users.</span>
+  <br><br>
+  <a href="https://github.com/jayantpatel06/ytd-downloader/releases/latest/download/ytd-setup.exe">
+    <img src="https://img.shields.io/badge/Download-Windows_Installer_(.exe)-2ea44f?style=for-the-badge&logo=windows&logoColor=white" alt="Download Windows Installer">
+  </a>
+  &nbsp;&nbsp;
+  <a href="https://github.com/jayantpatel06/ytd-downloader/releases/latest/download/ytd.exe">
+    <img src="https://img.shields.io/badge/Download-Portable_ytd.exe-0969da?style=for-the-badge&logo=windows&logoColor=white" alt="Download Portable EXE">
+  </a>
+</p>
 
 ---
 
-## ✨ Features
+## Features
 
-- 🖥️ Clean GUI with quality picker, folder chooser, progress bar
-- 💻 CLI for scripting / headless use
-- 🎵 Audio-only (MP3) download
-- 📋 Playlist support
-- Supports every site yt-dlp supports (YouTube, Twitter/X, Vimeo, …)
+- Simple desktop GUI with quality picker, destination folder selector, and progress bar
+- Full CLI for terminal usage and scripting
+- Video downloads up to 4K resolution
+- Audio-only extraction (MP3)
+- Full playlist support
+- Supports YouTube and all sites supported by yt-dlp
 
 ---
 
-## 📦 Installation
+## Installation
 
-No Python or FFmpeg required! Choose any option below:
+### Option 1: Terminal Command (PowerShell)
 
-### Option 1 — Single-line Terminal Command (PowerShell)
-Paste this into Windows PowerShell or Windows Terminal:
+Run in Windows PowerShell:
 
 ```powershell
 irm https://raw.githubusercontent.com/jayantpatel06/ytd-downloader/main/install.ps1 | iex
 ```
-* Automatically downloads `ytd.exe`
-* Adds `ytd` to your terminal PATH (so typing `ytd` works anywhere)
-* Creates a Desktop & Start Menu shortcut with the custom icon
+
+- Automatically downloads `ytd.exe`
+- Creates Desktop and Start Menu shortcuts
+- Adds `ytd` to your PATH so you can use it anywhere in terminal
 
 ---
 
-### Option 2 — Standard Windows Setup Wizard (`ytd-setup.exe`)
-1. Go to [**Latest Releases**](https://github.com/jayantpatel06/ytd-downloader/releases/latest)
-2. Download **`ytd-setup.exe`**
-3. Run the installer (Standard "Next > Next > Finish" setup wizard)
-* Installs to your user apps folder (no admin prompt required)
-* Automatically creates Desktop and Start Menu shortcuts
-* Adds `ytd` to system PATH so terminal CLI works immediately
-* Includes clean uninstaller in Windows Settings
+### Option 2: Windows Setup Wizard (`ytd-setup.exe`)
+
+[Download ytd-setup.exe](https://github.com/jayantpatel06/ytd-downloader/releases/latest/download/ytd-setup.exe)
+
+- Standard Windows setup wizard
+- Installs to user folder (no administrator privileges needed)
+- Creates Desktop and Start Menu shortcuts
+- Configures terminal PATH and Windows uninstaller
 
 ---
 
-### Option 3 — Portable Standalone `.exe` (No installation needed)
-1. Go to [**Latest Releases**](https://github.com/jayantpatel06/ytd-downloader/releases/latest)
-2. Download **`ytd.exe`**
-3. Double-click to open GUI, or run via terminal:
-```cmd
-ytd.exe "https://youtu.be/dQw4w9WgXcQ" -q 1080
-```
-* Creates a desktop shortcut automatically on first launch.
+### Option 3: Portable Executable (`ytd.exe`)
+
+[Download ytd.exe](https://github.com/jayantpatel06/ytd-downloader/releases/latest/download/ytd.exe)
+
+- Single standalone executable; no installation required
+- Automatically creates a Desktop shortcut on first run
 
 ---
 
-### Option 4 — Run from Source (Developers)
+### Option 4: Run from Source
+
 ```bash
 git clone https://github.com/jayantpatel06/ytd-downloader.git
 cd ytd-downloader
 pip install -r requirements.txt
-python -m ytd.cli          # GUI
+python -m ytd.cli          # Launch GUI
 python -m ytd.cli "URL"    # CLI download
 ```
 
 ---
 
-## 🖥️ GUI Usage
+## GUI Usage
 
-Just run `ytd` (or double-click the `.exe`).
+Run `ytd` or open the shortcut from your Desktop:
 
 | Field | Description |
 |-------|-------------|
-| **URL** | Paste any YouTube or supported-site link |
-| **Quality** | 360 / 480 / 720 / 1080 / 1440 / 2160p |
-| **Download playlist** | Check to grab the full playlist |
-| **Choose folder** | Pick where files are saved (default: current dir) |
+| URL | Paste any video or playlist link |
+| Quality | 360p, 480p, 720p, 1080p, 1440p, or 2160p (4K) |
+| Download playlist | Enable to download all videos in the playlist |
+| Browse | Choose destination directory (defaults to current folder) |
 
 ---
 
-## 💻 CLI Usage
+## CLI Usage
 
-```
+```text
 ytd [URL] [options]
 
 Options:
   -q, --quality   360|480|720|1080|1440|2160  (default: 1080)
   -o, --output    Output directory            (default: .)
   --playlist      Download entire playlist
-  -a, --audio-only  Audio only as MP3
-  --gui           Force GUI mode
-  --version       Show version and exit
+  -a, --audio-only  Download audio only as MP3
+  --gui           Launch GUI mode
+  --version       Show version
   -h, --help      Show help
 ```
 
 ### Examples
 
 ```bash
-# GUI
+# Launch GUI
 ytd
 
-# Download at best quality ≤1080p to current directory
+# Download at 1080p to current folder
 ytd "https://youtu.be/dQw4w9WgXcQ"
 
-# Download at 720p to ~/Videos
-ytd "https://youtu.be/dQw4w9WgXcQ" -q 720 -o ~/Videos
+# Download at 720p to custom folder
+ytd "https://youtu.be/dQw4w9WgXcQ" -q 720 -o D:\Videos
 
-# Audio only (MP3)
+# Download audio only
 ytd "https://youtu.be/dQw4w9WgXcQ" -a
 
-# Download a whole playlist
-ytd "https://youtube.com/playlist?list=PLXXX" --playlist -o ~/Playlists
+# Download playlist
+ytd "https://youtube.com/playlist?list=PLXXX" --playlist -o D:\Playlists
 ```
 
 ---
 
-## 🔧 Requirements
+## Building from Source
 
-| Requirement | Notes |
-|-------------|-------|
-| Python ≥ 3.9 | Only for pip / source install; not needed for `.exe` |
-| **ffmpeg** | Required for merging video + audio streams |
-| yt-dlp | Installed automatically with pip |
-
-### Installing ffmpeg
-
-| Platform | Command |
-|----------|---------|
-| **Windows** | `winget install ffmpeg` or download from [ffmpeg.org](https://ffmpeg.org/download.html) |
-| **macOS** | `brew install ffmpeg` |
-| **Linux** | `sudo apt install ffmpeg` or `sudo dnf install ffmpeg` |
-
----
-
-## 🏗️ Building the `.exe` yourself
+To compile the standalone executable locally:
 
 ```bash
-pip install pyinstaller
+pip install pyinstaller pillow pywin32
 python build_exe.py
-# → dist/ytd.exe
 ```
 
----
-
-## 🤝 Contributing
-
-Pull requests are welcome! Please open an issue first to discuss major changes.
+The compiled binary will be placed at `dist/ytd.exe`.
 
 ---
 
-## 📄 License
+## License
 
 [MIT](LICENSE)
-
