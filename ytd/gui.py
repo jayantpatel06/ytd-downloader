@@ -1,8 +1,9 @@
 """
-ytd/gui.py — Desktop GUI for YouTube Downloader with cancellation and update checks.
+ytd/gui.py — Desktop GUI for YouTube Downloader with in-app self-updater and cancellation.
 """
 
 import os
+import sys
 import threading
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
@@ -10,7 +11,11 @@ from tkinter import filedialog, messagebox, ttk
 from yt_dlp import YoutubeDL
 from ytd import __version__
 from ytd.ffmpeg_utils import find_ffmpeg, download_ffmpeg_if_missing
-from ytd.updater import check_for_updates_async, open_release_page
+from ytd.updater import (
+    apply_update_and_restart,
+    check_for_updates_async,
+    download_update_stream,
+)
 
 
 class DownloadCancelledError(Exception):
@@ -21,7 +26,7 @@ class DownloadCancelledError(Exception):
 def run_gui():
     root = tk.Tk()
     root.title(f"YouTube Downloader (v{__version__})")
-    root.geometry("480x340")
+    root.geometry("480x350")
     root.resizable(False, False)
 
     download_dir = {"path": ""}
@@ -50,31 +55,75 @@ def run_gui():
     def show_error(title: str, message: str):
         root.after(0, lambda: messagebox.showerror(title, message))
 
-    def show_update_banner(tag_name: str, release_url: str):
+    # In-app self-update banner
+    def show_update_banner(tag_name: str, download_url: str):
         def _build():
-            banner = tk.Frame(root, bg="#0f172a", pady=4)
+            banner = tk.Frame(root, bg="#0f172a", pady=5, padx=12)
             banner.pack(side="bottom", fill="x")
+
+            is_frozen = getattr(sys, "frozen", False)
+            text_var = tk.StringVar(value=f"Update available ({tag_name})")
             lbl = tk.Label(
                 banner,
-                text=f"New version {tag_name} available — Click to download",
-                fg="#38bdf8",
+                textvariable=text_var,
+                fg="#f1f5f9",
                 bg="#0f172a",
-                font=("Arial", 9, "underline"),
-                cursor="hand2",
+                font=("Arial", 9),
             )
-            lbl.pack()
-            lbl.bind("<Button-1>", lambda _: open_release_page(release_url))
+            lbl.pack(side="left")
+
+            ready_temp_path = {"path": ""}
+
+            def on_update_click():
+                if ready_temp_path["path"]:
+                    apply_update_and_restart(ready_temp_path["path"])
+                    return
+
+                if not is_frozen:
+                    import webbrowser
+                    webbrowser.open("https://github.com/jayantpatel06/ytd-downloader/releases")
+                    return
+
+                update_btn.config(state="disabled")
+                text_var.set("Downloading update... 0%")
+
+                def on_progress(pct: float):
+                    root.after(0, lambda: text_var.set(f"Downloading update... {pct:.0f}%"))
+
+                def on_complete(temp_path: str):
+                    ready_temp_path["path"] = temp_path
+                    root.after(0, lambda: text_var.set(f"Version {tag_name} ready."))
+                    root.after(0, lambda: update_btn.config(text="Restart Now", state="normal"))
+
+                def on_err(err_msg: str):
+                    root.after(0, lambda: text_var.set("Update failed."))
+                    root.after(0, lambda: update_btn.config(text="Retry", state="normal"))
+
+                threading.Thread(
+                    target=download_update_stream,
+                    args=(download_url, on_progress, on_complete, on_err),
+                    daemon=True,
+                ).start()
+
+            btn_label = "Update" if is_frozen else "View"
+            update_btn = tk.Button(
+                banner,
+                text=btn_label,
+                command=on_update_click,
+                font=("Arial", 8, "bold"),
+                padx=8,
+                pady=1,
+            )
+            update_btn.pack(side="right")
 
         root.after(0, _build)
 
     def on_action_click():
         if is_downloading["active"]:
-            # User clicked Cancel
             cancel_requested["active"] = True
             set_status("Cancelling download...")
             set_action_btn("Cancelling...", state="disabled")
         else:
-            # User clicked Download
             url = url_entry.get().strip()
             if not url:
                 messagebox.showerror("Error", "Please enter a valid video or playlist link.")
