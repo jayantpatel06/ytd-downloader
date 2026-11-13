@@ -1,12 +1,12 @@
 # .github/workflows/release.yml
 #
-# Triggered when you push a git tag like  v1.0.0
+# Triggered when you push a git tag like v1.0.0
 #   git tag v1.0.0 && git push origin v1.0.0
 #
 # What it does:
-#   1. Builds ytd.exe on Windows (PyInstaller) with custom icon + shortcut support
-#   2. Publishes the exe as a GitHub Release asset
-#   3. Publishes the Python package to PyPI
+#   1. Builds ytd.exe (standalone portable, with ffmpeg and custom icon)
+#   2. Builds ytd-setup.exe (Windows Setup Wizard installer using Inno Setup)
+#   3. Publishes both executables to your GitHub Releases page
 
 name: Build & Release
 
@@ -19,11 +19,8 @@ permissions:
   contents: write
 
 jobs:
-  # ───────────────────────────────────────────────
-  # 1. Build Windows exe
-  # ───────────────────────────────────────────────
-  build-exe:
-    name: Build Windows exe
+  build-and-release:
+    name: Build Installers & Publish Release
     runs-on: windows-latest
 
     steps:
@@ -37,6 +34,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install yt-dlp pyinstaller pillow pywin32
+          choco install innosetup -y
 
       - name: Convert PNG icon to ICO
         run: |
@@ -62,7 +60,7 @@ jobs:
             Write-Host "ffmpeg installed via choco and copied to assets/"
           }
 
-      - name: Build exe
+      - name: Build standalone ytd.exe
         run: |
           python -m PyInstaller `
             --onefile `
@@ -81,60 +79,15 @@ jobs:
             --hidden-import pythoncom `
             ytd/cli.py
 
-      - name: Upload exe artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ytd-exe
-          path: dist/ytd.exe
+      - name: Build Windows Setup Wizard (ytd-setup.exe)
+        run: |
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" installer.iss
 
-  # ───────────────────────────────────────────────
-  # 2. Create GitHub Release + attach exe
-  # ───────────────────────────────────────────────
-  github-release:
-    name: Publish GitHub Release
-    needs: build-exe
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download exe artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ytd-exe
-          path: dist/
-
-      - name: Create Release
+      - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/ytd.exe
+          files: |
+            dist/ytd.exe
+            dist/ytd-setup.exe
+            install.ps1
           generate_release_notes: true
-
-  # ───────────────────────────────────────────────
-  # 3. Publish to PyPI
-  # ───────────────────────────────────────────────
-  pypi-publish:
-    name: Publish to PyPI
-    needs: build-exe
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install build tools
-        run: pip install build twine
-
-      - name: Build sdist + wheel
-        run: python -m build
-
-      - name: Publish to PyPI
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_API_TOKEN }}
-        run: twine upload dist/*
-

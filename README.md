@@ -17,42 +17,43 @@
 
 ## 📦 Installation
 
-### Option 1 — pip (recommended, one line)
+No Python or FFmpeg required! Choose any option below:
 
-```bash
-pip install ytd-downloader
+### Option 1 — Single-line Terminal Command (PowerShell)
+Paste this into Windows PowerShell or Windows Terminal:
+
+```powershell
+irm https://raw.githubusercontent.com/jayantpatel06/ytd-downloader/main/install.ps1 | iex
 ```
-
-Then launch the GUI:
-
-```bash
-ytd          # launches GUI automatically
-```
-
-Or use the CLI:
-
-```bash
-ytd "https://youtu.be/dQw4w9WgXcQ"
-```
+* Automatically downloads `ytd.exe`
+* Adds `ytd` to your terminal PATH (so typing `ytd` works anywhere)
+* Creates a Desktop & Start Menu shortcut with the custom icon
 
 ---
 
-### Option 2 — Download the standalone `.exe` (Windows, no Python needed)
+### Option 2 — Standard Windows Setup Wizard (`ytd-setup.exe`)
+1. Go to [**Latest Releases**](https://github.com/jayantpatel06/ytd-downloader/releases/latest)
+2. Download **`ytd-setup.exe`**
+3. Run the installer (Standard "Next > Next > Finish" setup wizard)
+* Installs to your user apps folder (no admin prompt required)
+* Automatically creates Desktop and Start Menu shortcuts
+* Adds `ytd` to system PATH so terminal CLI works immediately
+* Includes clean uninstaller in Windows Settings
 
-1. Go to [**Releases**](https://github.com/jayantpatel06/ytd-downloader/releases)
-2. Download `ytd.exe` from the latest release
-3. Double-click to open the GUI **or** run from your terminal:
+---
 
+### Option 3 — Portable Standalone `.exe` (No installation needed)
+1. Go to [**Latest Releases**](https://github.com/jayantpatel06/ytd-downloader/releases/latest)
+2. Download **`ytd.exe`**
+3. Double-click to open GUI, or run via terminal:
 ```cmd
 ytd.exe "https://youtu.be/dQw4w9WgXcQ" -q 1080
 ```
-
-> **Tip:** Add the folder containing `ytd.exe` to your `PATH` so you can run `ytd` from anywhere.
+* Creates a desktop shortcut automatically on first launch.
 
 ---
 
-### Option 3 — Run from source
-
+### Option 4 — Run from Source (Developers)
 ```bash
 git clone https://github.com/jayantpatel06/ytd-downloader.git
 cd ytd-downloader

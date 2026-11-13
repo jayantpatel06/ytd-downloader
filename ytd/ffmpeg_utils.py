@@ -92,3 +92,4 @@ def download_ffmpeg_if_missing(status_callback=None) -> str | None:
         print(f"[ytd] Automatic ffmpeg setup skipped: {e}", file=sys.stderr)
 
     return None
+
