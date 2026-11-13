@@ -58,6 +58,7 @@ def build():
         "--hidden-import", "ytd.cli",
         "--hidden-import", "ytd.shortcut",
         "--hidden-import", "ytd.ffmpeg_utils",
+        "--hidden-import", "ytd.updater",
         "--hidden-import", "win32com",
         "--hidden-import", "win32com.client",
         "--hidden-import", "win32com.shell",

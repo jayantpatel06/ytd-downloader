@@ -58,7 +58,8 @@ def main():
     parser.add_argument("-o", "--output", default=".", help="Output directory (default: current directory)")
     parser.add_argument("--playlist", action="store_true", help="Download complete playlist")
     parser.add_argument("-a", "--audio-only", action="store_true", help="Download audio only as MP3")
-    parser.add_argument("--version", action="version", version="ytd 1.0.0")
+    from ytd import __version__
+    parser.add_argument("--version", action="version", version=f"ytd {__version__}")
 
     args = parser.parse_args()
 

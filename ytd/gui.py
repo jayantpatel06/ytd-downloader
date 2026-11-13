@@ -1,5 +1,5 @@
 """
-ytd/gui.py — Desktop GUI for YouTube Downloader
+ytd/gui.py — Desktop GUI for YouTube Downloader with cancellation and update checks.
 """
 
 import os
@@ -8,17 +8,25 @@ import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
 
 from yt_dlp import YoutubeDL
+from ytd import __version__
 from ytd.ffmpeg_utils import find_ffmpeg, download_ffmpeg_if_missing
+from ytd.updater import check_for_updates_async, open_release_page
+
+
+class DownloadCancelledError(Exception):
+    """Raised when the user cancels an in-progress download."""
+    pass
 
 
 def run_gui():
     root = tk.Tk()
-    root.title("YouTube Downloader")
-    root.geometry("480x320")
+    root.title(f"YouTube Downloader (v{__version__})")
+    root.geometry("480x340")
     root.resizable(False, False)
 
     download_dir = {"path": ""}
     is_downloading = {"active": False}
+    cancel_requested = {"active": False}
 
     # Set window icon
     try:
@@ -36,28 +44,50 @@ def run_gui():
     def set_progress(value: float):
         root.after(0, lambda: progress_bar.configure(value=value))
 
-    def set_btn_state(state: str):
-        root.after(0, lambda: download_btn.config(state=state))
+    def set_action_btn(text: str, state: str = "normal"):
+        root.after(0, lambda: action_btn.config(text=text, state=state))
 
     def show_error(title: str, message: str):
         root.after(0, lambda: messagebox.showerror(title, message))
 
-    def start_download_thread():
-        url = url_entry.get().strip()
-        if not url:
-            messagebox.showerror("Error", "Please enter a valid video or playlist link.")
-            return
+    def show_update_banner(tag_name: str, release_url: str):
+        def _build():
+            banner = tk.Frame(root, bg="#0f172a", pady=4)
+            banner.pack(side="bottom", fill="x")
+            lbl = tk.Label(
+                banner,
+                text=f"New version {tag_name} available — Click to download",
+                fg="#38bdf8",
+                bg="#0f172a",
+                font=("Arial", 9, "underline"),
+                cursor="hand2",
+            )
+            lbl.pack()
+            lbl.bind("<Button-1>", lambda _: open_release_page(release_url))
 
-        if not (url.startswith("http://") or url.startswith("https://")):
-            messagebox.showerror("Error", "URL must start with http:// or https://")
-            return
+        root.after(0, _build)
 
+    def on_action_click():
         if is_downloading["active"]:
-            return
+            # User clicked Cancel
+            cancel_requested["active"] = True
+            set_status("Cancelling download...")
+            set_action_btn("Cancelling...", state="disabled")
+        else:
+            # User clicked Download
+            url = url_entry.get().strip()
+            if not url:
+                messagebox.showerror("Error", "Please enter a valid video or playlist link.")
+                return
 
-        is_downloading["active"] = True
-        t = threading.Thread(target=perform_download, args=(url,), daemon=True)
-        t.start()
+            if not (url.startswith("http://") or url.startswith("https://")):
+                messagebox.showerror("Error", "URL must start with http:// or https://")
+                return
+
+            is_downloading["active"] = True
+            cancel_requested["active"] = False
+            t = threading.Thread(target=perform_download, args=(url,), daemon=True)
+            t.start()
 
     def perform_download(url: str):
         quality = quality_var.get()
@@ -66,9 +96,12 @@ def run_gui():
 
         set_progress(0)
         set_status("Starting download...")
-        set_btn_state("disabled")
+        set_action_btn("Cancel")
 
         def progress_hook(d):
+            if cancel_requested["active"]:
+                raise DownloadCancelledError()
+
             if d.get("status") == "downloading":
                 raw = str(d.get("_percent_str", "0%")).replace("%", "").strip()
                 try:
@@ -106,12 +139,20 @@ def run_gui():
                 ydl.download([url])
             set_progress(100)
             set_status("Download completed.")
+        except DownloadCancelledError:
+            set_progress(0)
+            set_status("Download cancelled.")
         except Exception as exc:
-            show_error("Download Failed", str(exc))
-            set_status("Error occurred.")
+            if cancel_requested["active"]:
+                set_progress(0)
+                set_status("Download cancelled.")
+            else:
+                show_error("Download Failed", str(exc))
+                set_status("Error occurred.")
         finally:
             is_downloading["active"] = False
-            set_btn_state("normal")
+            cancel_requested["active"] = False
+            set_action_btn("Download")
 
     def choose_directory():
         path = filedialog.askdirectory(title="Choose download folder")
@@ -119,8 +160,15 @@ def run_gui():
             download_dir["path"] = path
             dir_label.config(text=path)
 
+    def on_window_close():
+        if is_downloading["active"]:
+            cancel_requested["active"] = True
+        root.destroy()
+
+    root.protocol("WM_DELETE_WINDOW", on_window_close)
+
     # UI Layout
-    tk.Label(root, text="YouTube Downloader", font=("Arial", 16, "bold")).pack(pady=(12, 2))
+    tk.Label(root, text="YouTube Downloader", font=("Arial", 16, "bold")).pack(pady=(10, 2))
 
     tk.Label(root, text="Video or Playlist URL:").pack()
     url_entry = tk.Entry(root, width=58)
@@ -146,16 +194,23 @@ def run_gui():
     dir_label = tk.Label(row_dir, text="(current folder by default)", fg="grey")
     dir_label.pack(side="left", padx=8)
 
-    download_btn = tk.Button(
-        root, text="Download", command=start_download_thread,
+    action_btn = tk.Button(
+        root, text="Download", command=on_action_click,
         width=22, font=("Arial", 11, "bold")
     )
-    download_btn.pack(pady=10)
+    action_btn.pack(pady=8)
 
     progress_bar = ttk.Progressbar(root, length=400, maximum=100)
     progress_bar.pack(pady=4)
     status_label = tk.Label(root, text="Ready", font=("Arial", 10))
-    status_label.pack()
+    status_label.pack(pady=(0, 4))
+
+    # Background update check (non-blocking)
+    threading.Thread(
+        target=check_for_updates_async,
+        args=(__version__, show_update_banner),
+        daemon=True,
+    ).start()
 
     root.mainloop()
 
