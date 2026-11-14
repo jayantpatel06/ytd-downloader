@@ -5,7 +5,7 @@
   <br>
   <b>A fast, minimal video and audio downloader powered by yt-dlp.</b>
   <br>
-  <span>Includes both a desktop GUI and a command-line interface. No Python or FFmpeg setup required for Windows users.</span>
+  <span>Includes both a desktop GUI and a command-line interface. Automatic FFmpeg setup included.</span>
   <br><br>
   <a href="https://github.com/jayantpatel06/ytd-downloader/releases/latest/download/ytd-setup.exe">
     <img src="https://img.shields.io/badge/Download-Windows_Installer_(.exe)-2ea44f?style=for-the-badge&logo=windows&logoColor=white" alt="Download Windows Installer">
@@ -31,9 +31,9 @@
 
 ## Installation
 
-### Option 1: Terminal Command (PowerShell)
+### Option 1: One-Line Terminal Command
 
-Run in Windows PowerShell:
+**Windows (PowerShell):**
 
 ```powershell
 irm https://raw.githubusercontent.com/jayantpatel06/ytd-downloader/main/install.ps1 | iex
@@ -42,6 +42,16 @@ irm https://raw.githubusercontent.com/jayantpatel06/ytd-downloader/main/install.
 - Automatically downloads `ytd.exe`
 - Creates Desktop and Start Menu shortcuts
 - Adds `ytd` to your PATH so you can use it anywhere in terminal
+
+**Linux (Bash):**
+
+```bash
+curl -sSL https://raw.githubusercontent.com/jayantpatel06/ytd-downloader/main/install.sh | bash
+```
+
+- Automatically configures an isolated environment and installs `ytd`
+- Creates an application launcher (`ytd.desktop`) in your system app menu
+- Adds `ytd` command to your PATH (`~/.local/bin/ytd`)
 
 ---
 

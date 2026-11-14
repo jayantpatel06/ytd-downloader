@@ -33,12 +33,22 @@ def run_gui():
     is_downloading = {"active": False}
     cancel_requested = {"active": False}
 
-    # Set window icon
+    # Set window icon (supports Windows .ico and Linux .png)
     try:
         from ytd.cli import _get_icon_path
         ico = _get_icon_path()
-        if ico and os.path.exists(ico):
+        if sys.platform == "win32" and ico and os.path.exists(ico):
             root.iconbitmap(ico)
+        else:
+            png_candidates = [
+                os.path.join(os.path.dirname(__file__), "..", "assets", "ytd_icon.png"),
+                os.path.expanduser("~/.local/share/ytd/ytd_icon.png"),
+            ]
+            for p in png_candidates:
+                if os.path.isfile(p):
+                    _icon_img = tk.PhotoImage(file=p)
+                    root.iconphoto(True, _icon_img)
+                    break
     except Exception:
         pass
 

@@ -101,4 +101,5 @@ jobs:
             dist/ytd.exe
             dist/ytd-setup.exe
             install.ps1
+            install.sh
           generate_release_notes: true
