@@ -48,7 +48,7 @@ VENV_PIP="$INSTALL_DIR/venv/bin/pip"
 VENV_PYTHON="$INSTALL_DIR/venv/bin/python"
 
 echo "- Installing ytd-downloader..."
-"$VENV_PIP" install --upgrade pip --quiet
+"$VENV_PIP" install --upgrade pip setuptools wheel --quiet
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" 2>/dev/null && pwd || echo "")"
 if [ -n "$SCRIPT_DIR" ] && [ -f "$SCRIPT_DIR/pyproject.toml" ]; then

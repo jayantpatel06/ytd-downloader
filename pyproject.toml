@@ -1,10 +1,10 @@
 [build-system]
 requires = ["setuptools>=68", "wheel"]
-build-backend = "setuptools.backends.legacy:build"
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "ytd-downloader"
-version = "1.0.4"
+version = "1.0.5"
 description = "A simple YouTube / multi-site video downloader with both a GUI and a CLI, powered by yt-dlp."
 readme = "README.md"
 license = { text = "MIT" }
